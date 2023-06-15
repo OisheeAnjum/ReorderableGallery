@@ -1,29 +1,32 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 /* eslint-disable no-promise-executor-return */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/jsx-props-no-spreading */
 import CloseIcon from '@mui/icons-material/Close';
-import { TextField } from '@mui/material';
+import { MenuItem, Select, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
 import { styled } from '@mui/material/styles';
+import axios from 'axios';
 import { Form, Formik } from 'formik';
-import { MDBDataTable } from 'mdbreact';
 import PropTypes from 'prop-types';
 import * as React from 'react';
+import Employees from './Employees';
+import User from './User';
 
 function TabPanel(props) {
     const { children, value, index, ...other } = props;
-
     return (
         <div
             role="tabpanel"
@@ -76,7 +79,41 @@ function BootstrapDialogTitle(props) {
         </DialogTitle>
     );
 }
-export default function User() {
+export default function Home() {
+    const [division, setDivision] = React.useState(null);
+    const [selectedDivision, setSelectedDivision] = React.useState(null);
+    const [selectedDistrict, setSelectedDistrict] = React.useState(null);
+    const [district, setDistrict] = React.useState(null);
+    const fetch = async () => {
+        await axios
+            .get(`http://59.152.62.177:8085/api/Employee/Division`)
+            .then((response) => {
+                setDivision(response.data.readDivisionData);
+            })
+            .catch((error) => {
+                // Handle the error
+                console.error(error);
+            });
+    };
+    React.useEffect(() => {
+        fetch();
+    }, []);
+    const handleChangeDivision = async (event) => {
+        setSelectedDivision(event.target.value);
+        await axios
+            .get(`http://59.152.62.177:8085/api/Employee/District/${selectedDivision}`)
+            .then((response) => {
+                setDistrict(response.data.readDistrictData);
+            })
+            .catch((error) => {
+                // Handle the error
+                console.error(error);
+            });
+    };
+
+    const handleChangeDistrict = (event) => {
+        setSelectedDistrict(event.target.value);
+    };
     const [open, setOpen] = React.useState(false);
     const handleClickOpen = () => {
         setOpen(true);
@@ -84,112 +121,7 @@ export default function User() {
     const handleClose = () => {
         setOpen(false);
     };
-    const data = {
-        columns: [
-            {
-                label: 'Name',
-                field: 'name',
-                sort: 'asc',
-                width: 150,
-            },
-            {
-                label: 'Position',
-                field: 'position',
-                sort: 'asc',
-                width: 270,
-            },
-            {
-                label: 'Office',
-                field: 'office',
-                sort: 'asc',
-                width: 200,
-            },
-            {
-                label: 'Age',
-                field: 'age',
-                sort: 'asc',
-                width: 100,
-            },
-            {
-                label: 'Start date',
-                field: 'date',
-                sort: 'asc',
-                width: 150,
-            },
-            {
-                label: 'Salary',
-                field: 'salary',
-                sort: 'asc',
-                width: 100,
-            },
-        ],
-        rows: [
-            {
-                name: 'Tiger Nixon',
-                position: 'System Architect',
-                office: 'Edinburgh',
-                age: '61',
-                date: '2011/04/25',
-                salary: '$320',
-            },
-            {
-                name: 'Garrett Winters',
-                position: 'Accountant',
-                office: 'Tokyo',
-                age: '63',
-                date: '2011/07/25',
-                salary: '$170',
-            },
-            {
-                name: 'Ashton Cox',
-                position: 'Junior Technical Author',
-                office: 'San Francisco',
-                age: '66',
-                date: '2009/01/12',
-                salary: '$86',
-            },
-            {
-                name: 'Cedric Kelly',
-                position: 'Senior Javascript Developer',
-                office: 'Edinburgh',
-                age: '22',
-                date: '2012/03/29',
-                salary: '$433',
-            },
-            {
-                name: 'Airi Satou',
-                position: 'Accountant',
-                office: 'Tokyo',
-                age: '33',
-                date: '2008/11/28',
-                salary: '$162',
-            },
-            {
-                name: 'Brielle Williamson',
-                position: 'Integration Specialist',
-                office: 'New York',
-                age: '61',
-                date: '2012/12/02',
-                salary: '$372',
-            },
-            {
-                name: 'Herrod Chandler',
-                position: 'Sales Assistant',
-                office: 'San Francisco',
-                age: '59',
-                date: '2012/08/06',
-                salary: '$137',
-            },
-            {
-                name: 'Rhona Davidson',
-                position: 'Integration Specialist',
-                office: 'Tokyo',
-                age: '55',
-                date: '2010/10/14',
-                salary: '$327',
-            },
-        ],
-    };
+
     const [value, setValue] = React.useState(0);
 
     const handleChange = (event, newValue) => {
@@ -221,13 +153,10 @@ export default function User() {
                 </Tabs>
             </Box>
             <TabPanel value={value} index={0}>
-                <Button variant="outlined" onClick={handleClickOpen}>
-                    Open dialog
-                </Button>
-                <MDBDataTable striped bordered small data={data} />
+                <User onClick={handleClickOpen} />
             </TabPanel>
             <TabPanel value={value} index={1}>
-                Item Two
+                <Employees onClick={handleClickOpen} />
             </TabPanel>
 
             <BootstrapDialog
@@ -236,7 +165,7 @@ export default function User() {
                 open={open}
             >
                 <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
-                    Add New Admin
+                    Add New User
                 </BootstrapDialogTitle>
                 <DialogContent dividers>
                     <Typography style={{ minWidth: '20rem' }} gutterBottom>
@@ -245,7 +174,7 @@ export default function User() {
                                 initialValues={{
                                     firstName: '',
                                     lastName: '',
-                                    email: '',
+                                    division: '',
                                 }}
                                 onSubmit={async (values) => {
                                     await new Promise((r) => setTimeout(r, 500));
@@ -264,7 +193,47 @@ export default function User() {
                                             label="Last Name"
                                             variant="standard"
                                         />
-                                        <button type="submit">Submit</button>
+                                        <FormControl fullWidth>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                value={selectedDivision}
+                                                label="Age"
+                                                onChange={handleChangeDivision}
+                                            >
+                                                {division &&
+                                                    division.map((item) => (
+                                                        <MenuItem
+                                                            value={item.divID}
+                                                            key={item.divID}
+                                                        >
+                                                            {item.divisionName}
+                                                        </MenuItem>
+                                                    ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl fullWidth>
+                                            <Select
+                                                labelId="demo-simple-select-label"
+                                                id="demo-simple-select"
+                                                value={selectedDistrict}
+                                                label="District"
+                                                onChange={handleChangeDistrict}
+                                            >
+                                                {district &&
+                                                    district.map((item) => (
+                                                        <MenuItem
+                                                            value={item.districtID}
+                                                            key={item.districtID}
+                                                        >
+                                                            {item.districtName}
+                                                        </MenuItem>
+                                                    ))}
+                                            </Select>
+                                        </FormControl>
+                                        <div className="my-2">
+                                            <button type="submit">Submit</button>
+                                        </div>
                                     </div>
                                 </Form>
                             </Formik>
