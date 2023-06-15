@@ -84,6 +84,22 @@ export default function Home() {
     const [selectedDivision, setSelectedDivision] = React.useState(null);
     const [selectedDistrict, setSelectedDistrict] = React.useState(null);
     const [district, setDistrict] = React.useState(null);
+    const initial = {
+        firstName: '',
+        lastName: '',
+        employeeType: '',
+        districeID: '',
+    };
+    const [credentials, setCredentials] = React.useState(initial);
+    const credentialHandler = (name, value) => {
+        setCredentials({ ...credentials, [name]: value });
+    };
+    const formData = {
+        firstName: credentials.firstName,
+        lastName: credentials.lastName,
+        employeeType: credentials.employeeType,
+        districeID: credentials.districeID,
+    };
     const fetch = async () => {
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/Division`)
@@ -98,8 +114,10 @@ export default function Home() {
     React.useEffect(() => {
         fetch();
     }, []);
+
     const handleChangeDivision = async (event) => {
         setSelectedDivision(event.target.value);
+        setSelectedDistrict(null);
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/District/${selectedDivision}`)
             .then((response) => {
@@ -122,10 +140,10 @@ export default function Home() {
         setOpen(false);
     };
 
-    const [value, setValue] = React.useState(0);
+    const [tabvalue, setTabValue] = React.useState(0);
 
     const handleChange = (event, newValue) => {
-        setValue(newValue);
+        setTabValue(newValue);
     };
     BootstrapDialogTitle.propTypes = {
         children: PropTypes.node,
@@ -143,7 +161,7 @@ export default function Home() {
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
                 <Tabs
-                    value={value}
+                    value={tabvalue}
                     onChange={handleChange}
                     aria-label="basic tabs example"
                     centered
@@ -152,10 +170,10 @@ export default function Home() {
                     <Tab label="Employees" {...a11yProps(1)} />
                 </Tabs>
             </Box>
-            <TabPanel value={value} index={0}>
+            <TabPanel value={tabvalue} index={0}>
                 <User onClick={handleClickOpen} />
             </TabPanel>
-            <TabPanel value={value} index={1}>
+            <TabPanel value={tabvalue} index={1}>
                 <Employees onClick={handleClickOpen} />
             </TabPanel>
 
@@ -170,23 +188,16 @@ export default function Home() {
                 <DialogContent dividers>
                     <Typography style={{ minWidth: '20rem' }} gutterBottom>
                         <div>
-                            <Formik
-                                initialValues={{
-                                    firstName: '',
-                                    lastName: '',
-                                    division: '',
-                                }}
-                                onSubmit={async (values) => {
-                                    await new Promise((r) => setTimeout(r, 500));
-                                    alert(JSON.stringify(values, null, 2));
-                                }}
-                            >
+                            <Formik initial>
                                 <Form>
                                     <div className="d-flex flex-column">
                                         <TextField
                                             id="firstName"
                                             label="First Name"
                                             variant="standard"
+                                            onChange={(value) =>
+                                                credentialHandler('firstName', value)
+                                            }
                                         />
                                         <TextField
                                             id="lastName"
@@ -231,9 +242,6 @@ export default function Home() {
                                                     ))}
                                             </Select>
                                         </FormControl>
-                                        <div className="my-2">
-                                            <button type="submit">Submit</button>
-                                        </div>
                                     </div>
                                 </Form>
                             </Formik>
