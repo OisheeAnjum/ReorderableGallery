@@ -80,6 +80,41 @@ export default function Home() {
     const [divisionData, setDivisionData] = React.useState(null);
     const [district, setDistrict] = React.useState(null);
     const [districtData, setDistrictData] = React.useState(null);
+    const [open, setOpen] = React.useState(false);
+    const [data, setData] = React.useState(null);
+    const [emplpyeeData, setEmployeeData] = React.useState(null);
+    const fetchData = async () => {
+        await axios
+            .get(`http://59.152.62.177:8085/api/Employee/EmployeeData`)
+            .then((response) => {
+                const adminData = response.data.readEmployeeData.filter(
+                    (item) => item.employeeType.toLowerCase() === 'admin'
+                );
+                setData(adminData);
+                const empData = response.data.readEmployeeData.filter(
+                    (item) => item.employeeType.toLowerCase() === 'employee'
+                );
+                setEmployeeData(empData);
+            })
+            .catch((error) => {
+                // Handle the error
+                console.error(error);
+            });
+    };
+    React.useEffect(() => {
+        fetchData();
+    }, [data, emplpyeeData]);
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+    const handleClose = () => {
+        setOpen(false);
+    };
+    const [tabvalue, setTabValue] = React.useState(0);
+
+    const handleChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
     const fetch = async () => {
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/Division`)
@@ -101,19 +136,6 @@ export default function Home() {
                 // Handle the error
                 console.error(error);
             });
-    };
-    const [open, setOpen] = React.useState(false);
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const [tabvalue, setTabValue] = React.useState(0);
-
-    const handleChange = (event, newValue) => {
-        setTabValue(newValue);
     };
 
     React.useEffect(() => {
@@ -167,7 +189,6 @@ export default function Home() {
                 // Handle the error
                 console.error(error);
             });
-        console.log(formData);
         handleClose();
     };
     return (
@@ -179,15 +200,20 @@ export default function Home() {
                     aria-label="basic tabs example"
                     centered
                 >
-                    <Tab label="Admins" {...a11yProps(0)} />
+                    <Tab label="All User" {...a11yProps(0)} />
+                    <Tab label="Admins" {...a11yProps(2)} />
                     <Tab label="Employees" {...a11yProps(1)} />
                 </Tabs>
             </Box>
+
             <TabPanel value={tabvalue} index={0}>
-                <User onClick={handleClickOpen} />
+                <Employees onClick={handleClickOpen} />
             </TabPanel>
             <TabPanel value={tabvalue} index={1}>
-                <Employees onClick={handleClickOpen} />
+                <User onClick={handleClickOpen} data={data} />
+            </TabPanel>
+            <TabPanel value={tabvalue} index={2}>
+                <User onClick={handleClickOpen} data={emplpyeeData} />
             </TabPanel>
 
             <Modal open={open} onClose={handleClose}>

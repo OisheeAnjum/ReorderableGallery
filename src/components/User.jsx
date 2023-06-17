@@ -1,29 +1,12 @@
 import { Button } from '@mui/material';
-import axios from 'axios';
 import React from 'react';
-import { Table } from 'react-bootstrap';
+import { Pagination, Table } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-export default function User({ onClick }) {
+export default function User({ onClick, data }) {
+    const [activePage, setActivePage] = React.useState(5);
     const navigate = useNavigate();
-    const [data, setData] = React.useState(null);
-    const fetch = async () => {
-        await axios
-            .get(`http://59.152.62.177:8085/api/Employee/EmployeeData`)
-            .then((response) => {
-                const adminData = response.data.readEmployeeData.filter(
-                    (item) => item.employeeType.toLowerCase() === 'admin'
-                );
-                setData(adminData);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-    };
-    React.useEffect(() => {
-        fetch();
-    }, []);
+
     const detailsHandeler = (empid) => {
         navigate(`/user/details/${empid}`);
     };
@@ -66,6 +49,18 @@ export default function User({ onClick }) {
                             ))}
                     </tbody>
                 </Table>
+                {console.log(data)}
+                <Pagination
+                    prev
+                    last
+                    next
+                    first
+                    size="xs"
+                    total={data?.length}
+                    limit={5}
+                    activePage={activePage}
+                    onChangePage={setActivePage}
+                />
             </section>
         </div>
     );
