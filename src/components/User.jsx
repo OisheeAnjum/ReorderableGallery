@@ -1,50 +1,12 @@
 import { Button } from '@mui/material';
-import { MDBDataTable } from 'mdbreact';
-import React from 'react';
 import axios from 'axios';
+import React from 'react';
+import { Table } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 export default function User({ onClick }) {
-    const [data, setData] = React.useState({
-        columns: [
-            {
-                label: 'First Name',
-                field: 'firstName',
-                sort: 'asc',
-                width: 150,
-            },
-            {
-                label: 'Last Name',
-                field: 'lastName',
-                sort: 'asc',
-                width: 270,
-            },
-            {
-                label: 'Type',
-                field: 'employeeType',
-                sort: 'asc',
-                width: 200,
-            },
-            {
-                label: 'Division',
-                field: 'disvision',
-                sort: 'asc',
-                width: 100,
-            },
-            {
-                label: 'District',
-                field: 'district',
-                sort: 'asc',
-                width: 150,
-            },
-            {
-                label: 'Employee Id',
-                field: 'empID',
-                sort: 'asc',
-                width: 100,
-            },
-        ],
-        rows: [],
-    });
+    const navigate = useNavigate();
+    const [data, setData] = React.useState(null);
     const fetch = async () => {
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/EmployeeData`)
@@ -52,47 +14,7 @@ export default function User({ onClick }) {
                 const adminData = response.data.readEmployeeData.filter(
                     (item) => item.employeeType.toLowerCase() === 'admin'
                 );
-                setData({
-                    columns: [
-                        {
-                            label: 'First Name',
-                            field: 'firstName',
-                            sort: 'asc',
-                            width: 150,
-                        },
-                        {
-                            label: 'Last Name',
-                            field: 'lastName',
-                            sort: 'asc',
-                            width: 270,
-                        },
-                        {
-                            label: 'Type',
-                            field: 'employeeType',
-                            sort: 'asc',
-                            width: 200,
-                        },
-                        {
-                            label: 'Division',
-                            field: 'disvision',
-                            sort: 'asc',
-                            width: 100,
-                        },
-                        {
-                            label: 'District',
-                            field: 'district',
-                            sort: 'asc',
-                            width: 150,
-                        },
-                        {
-                            label: 'Employee Id',
-                            field: 'empID',
-                            sort: 'asc',
-                            width: 100,
-                        },
-                    ],
-                    rows: adminData,
-                });
+                setData(adminData);
             })
             .catch((error) => {
                 // Handle the error
@@ -102,12 +24,49 @@ export default function User({ onClick }) {
     React.useEffect(() => {
         fetch();
     }, []);
+    const detailsHandeler = (empid) => {
+        navigate(`/user/details/${empid}`);
+    };
+
     return (
         <div>
             <Button variant="outlined" onClick={onClick}>
                 Add Admin
             </Button>
-            <MDBDataTable striped bordered small data={data} />
+            <section className="mt-3">
+                <Table responsive striped bordered>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Type</th>
+                            <th>Division</th>
+                            <th>District</th>
+                            <th>Employee Id</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data &&
+                            data.map((item, index) => (
+                                <tr key={item.uuid}>
+                                    <td>{index + 1}</td>
+                                    <td>{item.firstName}</td>
+                                    <td>{item.lastName}</td>
+                                    <td>{item.employeeType}</td>
+                                    <td>{item.disvision}</td>
+                                    <td>{item.district}</td>
+                                    <td>{item.empID}</td>
+                                    <td>
+                                        <Button onClick={() => detailsHandeler(item.empID)}>
+                                            Details
+                                        </Button>
+                                    </td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </Table>
+            </section>
         </div>
     );
 }

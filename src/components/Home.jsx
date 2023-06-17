@@ -179,7 +179,7 @@ export default function Home() {
                     aria-label="basic tabs example"
                     centered
                 >
-                    <Tab label="Users" {...a11yProps(0)} />
+                    <Tab label="Admins" {...a11yProps(0)} />
                     <Tab label="Employees" {...a11yProps(1)} />
                 </Tabs>
             </Box>
@@ -212,7 +212,7 @@ export default function Home() {
                                 />
                             </Form.Group>
                             <Form.Group controlId="division">
-                                <Form.ControlLabel>division</Form.ControlLabel>
+                                <Form.ControlLabel>Division</Form.ControlLabel>
                                 <SelectPicker
                                     placeholder="Select division"
                                     data={divisionData || []}
@@ -221,7 +221,7 @@ export default function Home() {
                                 />
                             </Form.Group>
                             <Form.Group controlId="brand">
-                                <Form.ControlLabel>district</Form.ControlLabel>
+                                <Form.ControlLabel>District</Form.ControlLabel>
                                 <SelectPicker
                                     placeholder="Select district"
                                     data={districtData || []}
@@ -230,7 +230,7 @@ export default function Home() {
                                 />
                             </Form.Group>
                             <Form.Group controlId="Employee type">
-                                <Form.ControlLabel>Offer Type</Form.ControlLabel>
+                                <Form.ControlLabel>User Type</Form.ControlLabel>
                                 <SelectPicker
                                     data={[
                                         { label: 'Employee', value: 'Employee' },
