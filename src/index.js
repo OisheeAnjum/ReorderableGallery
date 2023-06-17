@@ -3,6 +3,7 @@ import 'bootstrap-css-only/css/bootstrap.min.css';
 import 'mdbreact/dist/css/mdb.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import 'rsuite/dist/rsuite-no-reset.min.css';
 import App from './App';
 import './index.css';
 import reportWebVitals from './reportWebVitals';

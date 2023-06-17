@@ -5,23 +5,18 @@
 /* eslint-disable react/require-default-props */
 /* eslint-disable react/jsx-props-no-spreading */
 import CloseIcon from '@mui/icons-material/Close';
-import { MenuItem, Select, TextField } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
-import FormControl from '@mui/material/FormControl';
 import IconButton from '@mui/material/IconButton';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Typography from '@mui/material/Typography';
-import { styled } from '@mui/material/styles';
 import axios from 'axios';
-import { Form, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import * as React from 'react';
+import { toast } from 'react-toastify';
+import { Form, Modal, SelectPicker } from 'rsuite';
 import Employees from './Employees';
 import User from './User';
 
@@ -80,26 +75,11 @@ function BootstrapDialogTitle(props) {
     );
 }
 export default function Home() {
+    const [load, setLoad] = React.useState(false);
     const [division, setDivision] = React.useState(null);
-    const [selectedDivision, setSelectedDivision] = React.useState(null);
-    const [selectedDistrict, setSelectedDistrict] = React.useState(null);
+    const [divisionData, setDivisionData] = React.useState(null);
     const [district, setDistrict] = React.useState(null);
-    const initial = {
-        firstName: '',
-        lastName: '',
-        employeeType: '',
-        districeID: '',
-    };
-    const [credentials, setCredentials] = React.useState(initial);
-    const credentialHandler = (name, value) => {
-        setCredentials({ ...credentials, [name]: value });
-    };
-    const formData = {
-        firstName: credentials.firstName,
-        lastName: credentials.lastName,
-        employeeType: credentials.employeeType,
-        districeID: credentials.districeID,
-    };
+    const [districtData, setDistrictData] = React.useState(null);
     const fetch = async () => {
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/Division`)
@@ -111,15 +91,9 @@ export default function Home() {
                 console.error(error);
             });
     };
-    React.useEffect(() => {
-        fetch();
-    }, []);
-
-    const handleChangeDivision = async (event) => {
-        setSelectedDivision(event.target.value);
-        setSelectedDistrict(null);
+    const handleChangeDivision = async (value) => {
         await axios
-            .get(`http://59.152.62.177:8085/api/Employee/District/${selectedDivision}`)
+            .get(`http://59.152.62.177:8085/api/Employee/District/${value}`)
             .then((response) => {
                 setDistrict(response.data.readDistrictData);
             })
@@ -127,10 +101,6 @@ export default function Home() {
                 // Handle the error
                 console.error(error);
             });
-    };
-
-    const handleChangeDistrict = (event) => {
-        setSelectedDistrict(event.target.value);
     };
     const [open, setOpen] = React.useState(false);
     const handleClickOpen = () => {
@@ -145,18 +115,61 @@ export default function Home() {
     const handleChange = (event, newValue) => {
         setTabValue(newValue);
     };
-    BootstrapDialogTitle.propTypes = {
-        children: PropTypes.node,
-        onClose: PropTypes.func.isRequired,
+
+    React.useEffect(() => {
+        if (!division) {
+            fetch();
+        }
+        if (division) {
+            const newData = division.map((item) => ({
+                label: item.divisionName.toUpperCase(),
+                value: item.divID,
+            }));
+            setDivisionData(newData);
+        }
+        if (!district) {
+            fetch();
+        }
+        if (district) {
+            const newData = district.map((item) => ({
+                label: item.districtName.toUpperCase(),
+                value: item.districtID,
+            }));
+            setDistrictData(newData);
+        }
+    }, [division, district]);
+    const initial = {
+        firstName: '',
+        lastName: '',
+        employeeType: '',
+        districeID: '',
     };
-    const BootstrapDialog = styled(Dialog)(({ theme }) => ({
-        '& .MuiDialogContent-root': {
-            padding: theme.spacing(2),
-        },
-        '& .MuiDialogActions-root': {
-            padding: theme.spacing(1),
-        },
-    }));
+    const [credentials, setCredentials] = React.useState(initial);
+    const credentialHandler = (name, value) => {
+        setCredentials({ ...credentials, [name]: value });
+    };
+    const submitHandler = async () => {
+        const formData = {
+            firstName: credentials.firstName,
+            lastName: credentials.lastName,
+            employeeType: credentials.employeeType,
+            districeID: credentials.districeID,
+        };
+        await axios
+            .post(`http://59.152.62.177:8085/api/Employee/SaveEmployeeInformation`, formData)
+            .then((response) => {
+                if (response.status === 200) {
+                    toast.success(`User Created Successfully`);
+                    setLoad(true);
+                }
+            })
+            .catch((error) => {
+                // Handle the error
+                console.error(error);
+            });
+        console.log(formData);
+        handleClose();
+    };
     return (
         <Box sx={{ width: '100%' }}>
             <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -177,83 +190,64 @@ export default function Home() {
                 <Employees onClick={handleClickOpen} />
             </TabPanel>
 
-            <BootstrapDialog
-                onClose={handleClose}
-                aria-labelledby="customized-dialog-title"
-                open={open}
-            >
-                <BootstrapDialogTitle id="customized-dialog-title" onClose={handleClose}>
+            <Modal open={open} onClose={handleClose}>
+                <Modal.Header id="customized-dialog-title" onClose={handleClose}>
                     Add New User
-                </BootstrapDialogTitle>
-                <DialogContent dividers>
-                    <Typography style={{ minWidth: '20rem' }} gutterBottom>
-                        <div>
-                            <Formik initial>
-                                <Form>
-                                    <div className="d-flex flex-column">
-                                        <TextField
-                                            id="firstName"
-                                            label="First Name"
-                                            variant="standard"
-                                            onChange={(value) =>
-                                                credentialHandler('firstName', value)
-                                            }
-                                        />
-                                        <TextField
-                                            id="lastName"
-                                            label="Last Name"
-                                            variant="standard"
-                                        />
-                                        <FormControl fullWidth>
-                                            <Select
-                                                labelId="demo-simple-select-label"
-                                                id="demo-simple-select"
-                                                value={selectedDivision}
-                                                label="Age"
-                                                onChange={handleChangeDivision}
-                                            >
-                                                {division &&
-                                                    division.map((item) => (
-                                                        <MenuItem
-                                                            value={item.divID}
-                                                            key={item.divID}
-                                                        >
-                                                            {item.divisionName}
-                                                        </MenuItem>
-                                                    ))}
-                                            </Select>
-                                        </FormControl>
-                                        <FormControl fullWidth>
-                                            <Select
-                                                labelId="demo-simple-select-label"
-                                                id="demo-simple-select"
-                                                value={selectedDistrict}
-                                                label="District"
-                                                onChange={handleChangeDistrict}
-                                            >
-                                                {district &&
-                                                    district.map((item) => (
-                                                        <MenuItem
-                                                            value={item.districtID}
-                                                            key={item.districtID}
-                                                        >
-                                                            {item.districtName}
-                                                        </MenuItem>
-                                                    ))}
-                                            </Select>
-                                        </FormControl>
-                                    </div>
-                                </Form>
-                            </Formik>
-                        </div>
-                    </Typography>
-                </DialogContent>
-                <DialogActions>
-                    <Button autoFocus onClick={handleClose}>
-                        Save changes
-                    </Button>
-                </DialogActions>
-            </BootstrapDialog>
+                </Modal.Header>
+                <Modal.Body>
+                    <div>
+                        <Form>
+                            <Form.Group controlId="firstName">
+                                <Form.ControlLabel>First Name</Form.ControlLabel>
+                                <Form.Control
+                                    name="firstName"
+                                    onChange={(value) => credentialHandler('firstName', value)}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="lastName">
+                                <Form.ControlLabel>Last Name</Form.ControlLabel>
+                                <Form.Control
+                                    name="lastName"
+                                    onChange={(value) => credentialHandler('lastName', value)}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="division">
+                                <Form.ControlLabel>division</Form.ControlLabel>
+                                <SelectPicker
+                                    placeholder="Select division"
+                                    data={divisionData || []}
+                                    style={{ width: '100%' }}
+                                    onChange={(value) => handleChangeDivision(value)}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="brand">
+                                <Form.ControlLabel>district</Form.ControlLabel>
+                                <SelectPicker
+                                    placeholder="Select district"
+                                    data={districtData || []}
+                                    style={{ width: '100%' }}
+                                    onChange={(value) => credentialHandler('districeID', value)}
+                                />
+                            </Form.Group>
+                            <Form.Group controlId="Employee type">
+                                <Form.ControlLabel>Offer Type</Form.ControlLabel>
+                                <SelectPicker
+                                    data={[
+                                        { label: 'Employee', value: 'Employee' },
+                                        { label: 'Admin', value: 'Admin' },
+                                    ]}
+                                    searchable={false}
+                                    style={{ width: '100%' }}
+                                    onChange={(value) => credentialHandler('employeeType', value)}
+                                />
+                            </Form.Group>
+                        </Form>
+                    </div>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button onClick={submitHandler}>Save changes</Button>
+                </Modal.Footer>
+            </Modal>
         </Box>
     );
 }

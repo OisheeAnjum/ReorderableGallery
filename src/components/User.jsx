@@ -1,7 +1,6 @@
 import { Button } from '@mui/material';
 import { MDBDataTable } from 'mdbreact';
 import React from 'react';
-
 import axios from 'axios';
 
 export default function User({ onClick }) {
