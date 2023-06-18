@@ -101,9 +101,7 @@ export default function Home() {
                 console.error(error);
             });
     };
-    React.useEffect(() => {
-        fetchData();
-    }, [data, emplpyeeData]);
+
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -137,7 +135,9 @@ export default function Home() {
                 console.error(error);
             });
     };
-
+    React.useEffect(() => {
+        fetchData();
+    }, [data, emplpyeeData]);
     React.useEffect(() => {
         if (!division) {
             fetch();

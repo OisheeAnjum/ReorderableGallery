@@ -49,7 +49,6 @@ export default function User({ onClick, data }) {
                             ))}
                     </tbody>
                 </Table>
-                {console.log(data)}
                 <Pagination
                     prev
                     last

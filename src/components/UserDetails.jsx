@@ -11,14 +11,27 @@ export default function UserDetails() {
     const navigate = useNavigate();
     const { empid } = useParams();
     const [data, setData] = React.useState(null);
-    const [division, setDivision] = React.useState(null);
     const [divisionData, setDivisionData] = React.useState(null);
-    const [district, setDistrict] = React.useState(null);
     const [districtData, setDistrictData] = React.useState(null);
+    const [division, setDivision] = React.useState(null);
+    const [district, setDistrict] = React.useState(null);
     const [editable, setEditable] = useState(false);
+
     const handleEdit = () => {
         setEditable(!editable);
     };
+    const fetchdata = async () => {
+        await axios
+            .get(`http://59.152.62.177:8085/api/Employee/IndividualEmployeeData/${empid}`)
+            .then((response) => {
+                setData(response.data.readEmployeeData[0]);
+            })
+            .catch((error) => {
+                // Handle the error
+                console.error(error);
+            });
+    };
+    // const [div, setDiv] = useState(data?.divisionId);
     const fetch = async () => {
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/Division`)
@@ -30,7 +43,9 @@ export default function UserDetails() {
                 console.error(error);
             });
     };
+    const [div, setDiv] = useState(data?.divisionId);
     const handleChangeDivision = async (value) => {
+        setDiv(value);
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/District/${value}`)
             .then((response) => {
@@ -41,7 +56,6 @@ export default function UserDetails() {
                 console.error(error);
             });
     };
-
     React.useEffect(() => {
         if (!division) {
             fetch();
@@ -64,20 +78,6 @@ export default function UserDetails() {
             setDistrictData(newData);
         }
     }, [division, district]);
-    const fetchdata = async () => {
-        await axios
-            .get(`http://59.152.62.177:8085/api/Employee/IndividualEmployeeData/${empid}`)
-            .then((response) => {
-                setData(response.data.readEmployeeData[0]);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-    };
-    React.useEffect(() => {
-        fetchdata();
-    }, [data]);
     const [credentials, setCredentials] = React.useState(null);
     useEffect(() => {
         if (data) {
@@ -89,7 +89,11 @@ export default function UserDetails() {
             });
         }
     }, [data]);
-
+    React.useEffect(() => {
+        if (!data) {
+            fetchdata();
+        }
+    }, [data]);
     const credentialHandler = (name, value) => {
         setCredentials({ ...credentials, [name]: value });
     };
@@ -230,7 +234,7 @@ export default function UserDetails() {
                     <Col md={6}>
                         <SelectPicker
                             data={divisionData || []}
-                            value={data?.divisionId}
+                            value={div}
                             style={{ width: '100%' }}
                             onChange={(value) => handleChangeDivision(value)}
                         />
