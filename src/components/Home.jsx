@@ -137,7 +137,7 @@ export default function Home() {
     };
     React.useEffect(() => {
         fetchData();
-    }, [data, emplpyeeData]);
+    }, []);
     React.useEffect(() => {
         if (!division) {
             fetch();

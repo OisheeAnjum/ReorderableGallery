@@ -3,18 +3,13 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { RxCross2 } from 'react-icons/rx';
-import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { Button, Divider, Input, SelectPicker } from 'rsuite';
 
-export default function UserDetails() {
-    const navigate = useNavigate();
-    const { empid } = useParams();
-    const [data, setData] = React.useState(null);
-    const [divisionData, setDivisionData] = React.useState(null);
-    const [districtData, setDistrictData] = React.useState(null);
-    const [division, setDivision] = React.useState(null);
+export default function UserDetails({ empID, divisionData }) {
     const [district, setDistrict] = React.useState(null);
+    const [districtData, setDistrictData] = React.useState(null);
+    const [data, setData] = React.useState(null);
     const [editable, setEditable] = useState(false);
 
     const handleEdit = () => {
@@ -22,7 +17,7 @@ export default function UserDetails() {
     };
     const fetchdata = async () => {
         await axios
-            .get(`http://59.152.62.177:8085/api/Employee/IndividualEmployeeData/${empid}`)
+            .get(`http://59.152.62.177:8085/api/Employee/IndividualEmployeeData/${empID}`)
             .then((response) => {
                 setData(response.data.readEmployeeData[0]);
             })
@@ -31,19 +26,13 @@ export default function UserDetails() {
                 console.error(error);
             });
     };
-    // const [div, setDiv] = useState(data?.divisionId);
-    const fetch = async () => {
-        await axios
-            .get(`http://59.152.62.177:8085/api/Employee/Division`)
-            .then((response) => {
-                setDivision(response.data.readDivisionData);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-    };
+    React.useEffect(() => {
+        if (!data) {
+            fetchdata();
+        }
+    }, [data]);
     const [div, setDiv] = useState(data?.divisionId);
+    console.log(div);
     const handleChangeDivision = async (value) => {
         setDiv(value);
         await axios
@@ -55,21 +44,6 @@ export default function UserDetails() {
                 // Handle the error
                 console.error(error);
             });
-    };
-    React.useEffect(() => {
-        if (!division) {
-            fetch();
-        }
-        if (division) {
-            const newData = division.map((item) => ({
-                label: item.divisionName.toUpperCase(),
-                value: item.divID,
-            }));
-            setDivisionData(newData);
-        }
-        if (!district) {
-            fetch();
-        }
         if (district) {
             const newData = district.map((item) => ({
                 label: item.districtName.toUpperCase(),
@@ -77,7 +51,7 @@ export default function UserDetails() {
             }));
             setDistrictData(newData);
         }
-    }, [division, district]);
+    };
     const [credentials, setCredentials] = React.useState(null);
     useEffect(() => {
         if (data) {
@@ -89,18 +63,14 @@ export default function UserDetails() {
             });
         }
     }, [data]);
-    React.useEffect(() => {
-        if (!data) {
-            fetchdata();
-        }
-    }, [data]);
+
     const credentialHandler = (name, value) => {
         setCredentials({ ...credentials, [name]: value });
     };
     const updateHandeler = async () => {
         await axios
             .put(
-                `http://59.152.62.177:8085/api/Employee/UpdateEmployeeInformation/${empid}`,
+                `http://59.152.62.177:8085/api/Employee/UpdateEmployeeInformation/${empID}`,
                 credentials
             )
             .then((response) => {
@@ -234,7 +204,6 @@ export default function UserDetails() {
                     <Col md={6}>
                         <SelectPicker
                             data={divisionData || []}
-                            value={div}
                             style={{ width: '100%' }}
                             onChange={(value) => handleChangeDivision(value)}
                         />
@@ -248,7 +217,6 @@ export default function UserDetails() {
                     <Col md={6}>
                         <SelectPicker
                             data={districtData || []}
-                            value={credentials?.districeID}
                             style={{ width: '100%' }}
                             onChange={(value) => credentialHandler('districeID', value)}
                         />
@@ -270,13 +238,7 @@ export default function UserDetails() {
 
     return (
         <Container className="mt-4">
-            <Button appearance="primary" onClick={() => navigate(-1)}>
-                Go Back
-            </Button>
-            <div className=" w-100 text-center mb-2">
-                <h4>User Information</h4>
-                {userView()}
-            </div>
+            <div className=" w-100 text-center mb-2">{userView()}</div>
         </Container>
     );
 }

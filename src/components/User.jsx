@@ -1,21 +1,18 @@
 import { Button } from '@mui/material';
-import React from 'react';
-import { Pagination, Table } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Table } from 'react-bootstrap';
+import { Drawer } from 'rsuite';
+import UserDetails from './UserDetails';
 
-export default function User({ onClick, data }) {
-    const [activePage, setActivePage] = React.useState(5);
-    const navigate = useNavigate();
-
-    const detailsHandeler = (empid) => {
-        navigate(`/user/details/${empid}`);
+export default function User({ data, divisionData, districtData }) {
+    const [open, setOpen] = useState(false);
+    const [id, setID] = useState(null);
+    const detailHandeler = (value) => {
+        setID(value);
+        setOpen(true);
     };
-
     return (
         <div>
-            <Button variant="outlined" onClick={onClick}>
-                Add Admin
-            </Button>
             <section className="mt-3">
                 <Table responsive striped bordered>
                     <thead>
@@ -41,7 +38,7 @@ export default function User({ onClick, data }) {
                                     <td>{item.district}</td>
                                     <td>{item.empID}</td>
                                     <td>
-                                        <Button onClick={() => detailsHandeler(item.empID)}>
+                                        <Button onClick={() => detailHandeler(item.empID)}>
                                             Details
                                         </Button>
                                     </td>
@@ -49,17 +46,20 @@ export default function User({ onClick, data }) {
                             ))}
                     </tbody>
                 </Table>
-                <Pagination
-                    prev
-                    last
-                    next
-                    first
-                    size="xs"
-                    total={data?.length}
-                    limit={5}
-                    activePage={activePage}
-                    onChangePage={setActivePage}
-                />
+                <Drawer size="full" open={open} onClose={() => setOpen(false)}>
+                    <Drawer.Header>
+                        <Drawer.Title>
+                            <h4>User Information</h4>
+                        </Drawer.Title>
+                    </Drawer.Header>
+                    <Drawer.Body>
+                        <UserDetails
+                            empID={id}
+                            divisionData={divisionData}
+                            districtData={districtData}
+                        />
+                    </Drawer.Body>
+                </Drawer>
             </section>
         </div>
     );

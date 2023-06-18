@@ -1,9 +1,8 @@
-import { Button } from '@mui/material';
 import axios from 'axios';
 import { MDBDataTable } from 'mdbreact';
 import React from 'react';
 
-export default function Employees({ onClick }) {
+export default function Employees() {
     const [data, setData] = React.useState({
         columns: [
             {
@@ -104,9 +103,6 @@ export default function Employees({ onClick }) {
     }, []);
     return (
         <div>
-            <Button variant="outlined" onClick={onClick}>
-                Add Employee
-            </Button>
             <MDBDataTable striped bordered small data={data} />
         </div>
     );
