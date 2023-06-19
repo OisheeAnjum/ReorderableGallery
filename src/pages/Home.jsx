@@ -12,9 +12,9 @@ export default function Home() {
     const [tabValue, setTabValue] = useState('all');
     const [adminData, setAdminData] = useState(null);
     const [emplpyeeData, setEmployeeData] = useState(null);
-    const [division, setDivision] = React.useState(null);
+    const [divisions, setDivisions] = React.useState(null);
     const [divisionData, setDivisionData] = React.useState(null);
-    const [district, setDistrict] = React.useState(null);
+    const [districts, setDistricts] = React.useState(null);
     const [districtData, setDistrictData] = React.useState(null);
     const tabHandeler = (val) => {
         if (val === 'all') {
@@ -40,10 +40,7 @@ export default function Home() {
         employeeType: '',
         districeID: '',
     };
-    const [credentials, setCredentials] = React.useState(initial);
-    const credentialHandler = (name, value) => {
-        setCredentials({ ...credentials, [name]: value });
-    };
+
     const fetchData = async () => {
         await axios
             .get('http://59.152.62.177:8085/api/Employee/EmployeeData')
@@ -59,32 +56,58 @@ export default function Home() {
             })
             .catch((err) => err.response);
     };
-    useEffect(() => {
-        fetchData();
-    }, []);
-    const fetchDivision = async () => {
-        await axios
+    const fetchDivisions = async () => {
+        const res = await axios
             .get(`http://59.152.62.177:8085/api/Employee/Division`)
-            .then((response) => {
-                setDivision(response.data.readDivisionData);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-    };
-    React.useEffect(() => {
-        if (!division) {
-            fetchDivision();
+            .then((response) => response)
+            .catch((err) => err.response);
+        if (res.status === 200) {
+            setDivisions(res.data.readDivisionData);
         }
-        if (division) {
-            const newData = division.map((item) => ({
+    };
+    const fetchDistricts = async (divisionId) => {
+        const res = await axios
+            .get(`http://59.152.62.177:8085/api/Employee/District/${divisionId}`)
+            .then((response) => response)
+            .catch((err) => err.response);
+        if (res.status === 200) {
+            setDistricts(res.data.readDistrictData);
+        }
+    };
+    const [credentials, setCredentials] = React.useState(initial);
+    const credentialHandler = (name, value) => {
+        if (name === 'divisionId') {
+            fetchDistricts(value);
+            setCredentials({ ...credentials, [name]: value, districeID: '' });
+        } else {
+            setCredentials({ ...credentials, [name]: value });
+        }
+    };
+    useEffect(() => {
+        if (!adminData || !emplpyeeData) {
+            fetchData();
+        }
+        if ((adminData && !divisions) || (emplpyeeData && !divisions)) {
+            fetchDivisions();
+        }
+        if (divisions) {
+            const newData = divisions.map((item) => ({
                 label: item.divisionName.toUpperCase(),
                 value: item.divID,
             }));
             setDivisionData(newData);
         }
-    }, [division]);
+        if ((adminData && !districts) || (emplpyeeData && !districts)) {
+            fetchDistricts(adminData.divisionId);
+        }
+        if (districts) {
+            const newData = districts.map((item) => ({
+                label: item.districtName.toUpperCase(),
+                value: item.districtID,
+            }));
+            setDistrictData(newData);
+        }
+    }, [emplpyeeData, adminData, divisions, districts]);
     const tabView = () => {
         if (tabValue === 'all') {
             return <Employees />;
@@ -98,24 +121,6 @@ export default function Home() {
             return <User data={emplpyeeData} />;
         }
         return null;
-    };
-    const handleChangeDivision = async (value) => {
-        await axios
-            .get(`http://59.152.62.177:8085/api/Employee/District/${value}`)
-            .then((response) => {
-                setDistrict(response.data.readDistrictData);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-        if (district) {
-            const newData = district.map((item) => ({
-                label: item.districtName.toUpperCase(),
-                value: item.districtID,
-            }));
-            setDistrictData(newData);
-        }
     };
     const submitHandler = async () => {
         const formData = {
@@ -218,10 +223,9 @@ export default function Home() {
                             <Form.Group controlId="division">
                                 <Form.ControlLabel>Division</Form.ControlLabel>
                                 <SelectPicker
-                                    placeholder="Select division"
                                     data={divisionData || []}
                                     style={{ width: '100%' }}
-                                    onChange={(value) => handleChangeDivision(value)}
+                                    onChange={(value) => credentialHandler('divisionId', value)}
                                 />
                             </Form.Group>
                             <Form.Group controlId="brand">

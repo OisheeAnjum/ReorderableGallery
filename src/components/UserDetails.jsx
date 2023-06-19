@@ -3,6 +3,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { RxCross2 } from 'react-icons/rx';
+import { toast } from 'react-toastify';
 import { Button, Divider, Input, SelectPicker } from 'rsuite';
 
 export default function UserDetails({ id }) {
@@ -84,13 +85,30 @@ export default function UserDetails({ id }) {
         }
         if (districts) {
             const newData = districts.map((item) => ({
-                label: item.districtName,
+                label: item.districtName.toUpperCase(),
                 value: item.districtID,
             }));
             setDistrictData(newData);
         }
     }, [id, userData, divisions, districts]);
-
+    const updateHandeler = async () => {
+        await axios
+            .put(
+                `http://59.152.62.177:8085/api/Employee/UpdateEmployeeInformation/${id}`,
+                credentials
+            )
+            .then((response) => {
+                if (response.status === 200) {
+                    toast.success(`User Updated Successfully`);
+                    handleEdit();
+                    fetchUser(id);
+                }
+            })
+            .catch((error) => {
+                // Handle the error
+                console.error(error);
+            });
+    };
     const userView = () => {
         if (!editable) {
             return (
@@ -212,7 +230,7 @@ export default function UserDetails({ id }) {
                             data={divisionData || []}
                             value={credentials?.divisionId}
                             style={{ width: '100%' }}
-                            onSelect={(value) => credentialHandler('divisionId', value)}
+                            onChange={(value) => credentialHandler('divisionId', value)}
                         />
                     </Col>
                 </Row>
@@ -232,7 +250,7 @@ export default function UserDetails({ id }) {
                 </Row>
                 <Row>
                     <Col md={12} className="mt-3">
-                        <Button size="sm" appearance="primary">
+                        <Button size="sm" appearance="primary" onClick={updateHandeler}>
                             Update
                         </Button>
                         <Button size="md" appearance="subtle" onClick={handleEdit}>
