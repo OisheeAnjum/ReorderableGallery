@@ -4,7 +4,7 @@ import { Table } from 'react-bootstrap';
 import { Drawer } from 'rsuite';
 import UserDetails from './UserDetails';
 
-export default function User({ data, divisionData, districtData }) {
+export default function User({ data }) {
     const [open, setOpen] = useState(false);
     const [id, setID] = useState(null);
     const detailHandeler = (value) => {
@@ -53,11 +53,7 @@ export default function User({ data, divisionData, districtData }) {
                         </Drawer.Title>
                     </Drawer.Header>
                     <Drawer.Body>
-                        <UserDetails
-                            empID={id}
-                            divisionData={divisionData}
-                            districtData={districtData}
-                        />
+                        <UserDetails id={id} />
                     </Drawer.Body>
                 </Drawer>
             </section>
