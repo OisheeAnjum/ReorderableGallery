@@ -1,94 +1,96 @@
-/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { RxCross2 } from 'react-icons/rx';
-import { toast } from 'react-toastify';
 import { Button, Divider, Input, SelectPicker } from 'rsuite';
 
-export default function UserDetails({ empID, divisionData }) {
-    const [district, setDistrict] = React.useState(null);
+export default function UserDetails({ id }) {
+    const [divisions, setDivisions] = useState(null);
+    const [divisionData, setDivisionData] = React.useState(null);
+    const [districts, setDistricts] = useState(null);
     const [districtData, setDistrictData] = React.useState(null);
-    const [data, setData] = React.useState(null);
+    const [userData, setUserData] = useState(null);
+    const [credentials, setCredentials] = useState({
+        firstName: '',
+        lastName: '',
+        employeeType: '',
+        districeID: '',
+        divisionId: '',
+    });
     const [editable, setEditable] = useState(false);
 
     const handleEdit = () => {
         setEditable(!editable);
     };
-    const fetchdata = async () => {
-        await axios
-            .get(`http://59.152.62.177:8085/api/Employee/IndividualEmployeeData/${empID}`)
-            .then((response) => {
-                setData(response.data.readEmployeeData[0]);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-    };
-    React.useEffect(() => {
-        if (!data) {
-            fetchdata();
-        }
-    }, [data]);
-    console.log(districtData);
-    const [credentials, setCredentials] = React.useState({
-        firstName: data?.firstName,
-        lastName: data?.lastName,
-        employeeType: data?.employeeType,
-        districeID: data?.districeID,
-    });
-    useEffect(() => {
-        if (data) {
+    const fetchUser = async (userId) => {
+        const res = await axios
+            .get(`http://59.152.62.177:8085/api/Employee/IndividualEmployeeData/${userId}`)
+            .then((response) => response)
+            .catch((err) => err.response);
+        if (res.status === 200) {
+            setUserData(res.data.readEmployeeData[0]);
             setCredentials({
-                firstName: data?.firstName,
-                lastName: data?.lastName,
-                employeeType: data?.employeeType,
-                districeID: data?.districeID,
-                divisionId: data?.divisionId,
+                firstName: res.data.readEmployeeData[0]?.firstName,
+                lastName: res.data.readEmployeeData[0]?.lastName,
+                employeeType: res.data.readEmployeeData[0]?.employeeType,
+                districeID: res.data.readEmployeeData[0]?.districeID,
+                divisionId: res.data.readEmployeeData[0]?.divisionId,
             });
         }
-    }, [data]);
-    const handleChangeDivision = async (value) => {
-        await axios
-            .get(`http://59.152.62.177:8085/api/Employee/District/${value}`)
-            .then((response) => {
-                setDistrict(response.data.readDistrictData);
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-        if (district) {
-            const newData = district.map((item) => ({
-                label: item.districtName.toUpperCase(),
+    };
+    const fetchDivisions = async () => {
+        const res = await axios
+            .get(`http://59.152.62.177:8085/api/Employee/Division`)
+            .then((response) => response)
+            .catch((err) => err.response);
+        if (res.status === 200) {
+            setDivisions(res.data.readDivisionData);
+        }
+    };
+    const fetchDistricts = async (divisionId) => {
+        const res = await axios
+            .get(`http://59.152.62.177:8085/api/Employee/District/${divisionId}`)
+            .then((response) => response)
+            .catch((err) => err.response);
+        if (res.status === 200) {
+            setDistricts(res.data.readDistrictData);
+        }
+    };
+    const credentialHandler = (name, value) => {
+        if (name === 'divisionId') {
+            fetchDistricts(value);
+            setCredentials({ ...credentials, [name]: value, districeID: '' });
+        } else {
+            setCredentials({ ...credentials, [name]: value });
+        }
+    };
+    useEffect(() => {
+        if (id && !userData) {
+            fetchUser(id);
+        }
+        if (userData && !divisions) {
+            fetchDivisions();
+        }
+        if (divisions) {
+            const newData = divisions.map((item) => ({
+                label: item.divisionName.toUpperCase(),
+                value: item.divID,
+            }));
+            setDivisionData(newData);
+        }
+        if (userData && !districts) {
+            fetchDistricts(userData.divisionId);
+        }
+        if (districts) {
+            const newData = districts.map((item) => ({
+                label: item.districtName,
                 value: item.districtID,
             }));
             setDistrictData(newData);
         }
-    };
-    const credentialHandler = (name, value) => {
-        setCredentials({ ...credentials, [name]: value });
-    };
+    }, [id, userData, divisions, districts]);
 
-    const updateHandeler = async () => {
-        await axios
-            .put(
-                `http://59.152.62.177:8085/api/Employee/UpdateEmployeeInformation/${empID}`,
-                credentials
-            )
-            .then((response) => {
-                if (response.status === 200) {
-                    toast.success(`User Updated Successfully`);
-                    handleEdit();
-                    fetchdata();
-                }
-            })
-            .catch((error) => {
-                // Handle the error
-                console.error(error);
-            });
-    };
     const userView = () => {
         if (!editable) {
             return (
@@ -98,7 +100,7 @@ export default function UserDetails({ empID, divisionData }) {
                             <b>First Name</b>
                         </Col>
                         <Col md={6}>
-                            <b>{data?.firstName}</b>
+                            <b>{userData?.firstName}</b>
                         </Col>
                     </Row>
                     <Divider />
@@ -107,7 +109,7 @@ export default function UserDetails({ empID, divisionData }) {
                             <b>Last Name</b>
                         </Col>
                         <Col md={6}>
-                            <b>{data?.lastName}</b>
+                            <b>{userData?.lastName}</b>
                         </Col>
                     </Row>
                     <Divider />
@@ -116,7 +118,7 @@ export default function UserDetails({ empID, divisionData }) {
                             <b>Type</b>
                         </Col>
                         <Col md={6}>
-                            <b>{data?.employeeType}</b>
+                            <b>{userData?.employeeType}</b>
                         </Col>
                     </Row>
                     <Divider />
@@ -125,7 +127,7 @@ export default function UserDetails({ empID, divisionData }) {
                             <b>Division</b>
                         </Col>
                         <Col md={6}>
-                            <b>{data?.disvision}</b>
+                            <b>{userData?.disvision}</b>
                         </Col>
                     </Row>
                     <Divider />
@@ -134,7 +136,7 @@ export default function UserDetails({ empID, divisionData }) {
                             <b>District</b>
                         </Col>
                         <Col md={6}>
-                            <b>{data?.district}</b>
+                            <b>{userData?.district}</b>
                         </Col>
                     </Row>
                     <Divider />
@@ -208,10 +210,9 @@ export default function UserDetails({ empID, divisionData }) {
                     <Col md={6}>
                         <SelectPicker
                             data={divisionData || []}
-                            defaultValue={credentials?.divisionId}
+                            value={credentials?.divisionId}
                             style={{ width: '100%' }}
-                            onEnter={(value) => handleChangeDivision(value)}
-                            onSelect={(value) => handleChangeDivision(value)}
+                            onSelect={(value) => credentialHandler('divisionId', value)}
                         />
                     </Col>
                 </Row>
@@ -223,7 +224,7 @@ export default function UserDetails({ empID, divisionData }) {
                     <Col md={6}>
                         <SelectPicker
                             data={districtData || []}
-                            defaultValue={credentials?.districeID}
+                            value={credentials?.districeID}
                             style={{ width: '100%' }}
                             onChange={(value) => credentialHandler('districeID', value)}
                         />
@@ -231,7 +232,7 @@ export default function UserDetails({ empID, divisionData }) {
                 </Row>
                 <Row>
                     <Col md={12} className="mt-3">
-                        <Button size="sm" appearance="primary" onClick={updateHandeler}>
+                        <Button size="sm" appearance="primary">
                             Update
                         </Button>
                         <Button size="md" appearance="subtle" onClick={handleEdit}>
@@ -242,26 +243,6 @@ export default function UserDetails({ empID, divisionData }) {
             </div>
         );
     };
-
-    useEffect(() => {
-        async function division() {
-            // to do code
-        }
-        division();
-        async function fecthdistrict() {
-            await axios
-                .get(`http://59.152.62.177:8085/api/Employee/District/${credentials.divisionId}`)
-                .then((response) => {
-                    setDistrict(response.data.readDistrictData);
-                })
-                .catch((error) => {
-                    // Handle the error
-                    console.error(error);
-                });
-        }
-        fecthdistrict();
-    });
-
     return (
         <Container className="mt-4">
             <div className=" w-100 text-center mb-2">{userView()}</div>
