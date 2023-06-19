@@ -31,10 +31,30 @@ export default function UserDetails({ empID, divisionData }) {
             fetchdata();
         }
     }, [data]);
-    const [div, setDiv] = useState(data?.divisionId);
-    console.log(div);
+
+    const [credentials, setCredentials] = React.useState({
+        firstName: data?.firstName,
+        lastName: data?.lastName,
+        employeeType: data?.employeeType,
+        districeID: data?.districeID,
+    });
+    const [div, setDiv] = React.useState(null);
+    useEffect(() => {
+        if (data) {
+            setCredentials({
+                firstName: data?.firstName,
+                lastName: data?.lastName,
+                employeeType: data?.employeeType,
+                districeID: data?.districeID,
+            });
+            setDiv({
+                label: data.disvision.toUpperCase(),
+                value: data.divisionId,
+            });
+        }
+    }, [data]);
+    console.log(credentials?.districeID);
     const handleChangeDivision = async (value) => {
-        setDiv(value);
         await axios
             .get(`http://59.152.62.177:8085/api/Employee/District/${value}`)
             .then((response) => {
@@ -52,21 +72,14 @@ export default function UserDetails({ empID, divisionData }) {
             setDistrictData(newData);
         }
     };
-    const [credentials, setCredentials] = React.useState(null);
-    useEffect(() => {
-        if (data) {
-            setCredentials({
-                firstName: data?.firstName,
-                lastName: data?.lastName,
-                employeeType: data?.employeeType,
-                districeID: data?.districeID,
-            });
-        }
-    }, [data]);
-
     const credentialHandler = (name, value) => {
         setCredentials({ ...credentials, [name]: value });
     };
+    const divHandler = (name, value) => {
+        setDiv({ ...credentials, [name]: value });
+        handleChangeDivision(value);
+    };
+
     const updateHandeler = async () => {
         await axios
             .put(
@@ -204,8 +217,9 @@ export default function UserDetails({ empID, divisionData }) {
                     <Col md={6}>
                         <SelectPicker
                             data={divisionData || []}
+                            defaultValue={div.value}
                             style={{ width: '100%' }}
-                            onChange={(value) => handleChangeDivision(value)}
+                            onChange={(value) => divHandler('label', value)}
                         />
                     </Col>
                 </Row>
@@ -217,6 +231,7 @@ export default function UserDetails({ empID, divisionData }) {
                     <Col md={6}>
                         <SelectPicker
                             data={districtData || []}
+                            value={credentials.districeID}
                             style={{ width: '100%' }}
                             onChange={(value) => credentialHandler('districeID', value)}
                         />
