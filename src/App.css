@@ -27,6 +27,9 @@
 .App-link {
   color: #61dafb;
 }
+.yellow-border {
+  border: 2px solid #ffc107; /* #ffc107 is the Bootstrap yellow color */
+}
 
 @keyframes App-logo-spin {
   from {
