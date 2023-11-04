@@ -21,6 +21,7 @@ export default function Landingpage() {
         } else {
             setSelectedImages([...selectedImages, imageId]);
         }
+        console.log(imageId);
     };
     const imageSources = [
         {
@@ -49,7 +50,7 @@ export default function Landingpage() {
             const reader = new FileReader();
             reader.onload = () => {
                 const uploadedImage = {
-                    id: imageList.length + index + 1, // Assign a unique ID
+                    id: imageList.length + Math.floor(Math.random()) + index + 1, // Assign a unique ID
                     src: reader.result,
                 };
                 setImageList((prevImageList) => [...prevImageList, uploadedImage]);
@@ -73,6 +74,18 @@ export default function Landingpage() {
         const updatedImageList = imageList.filter((image) => !selectedImageIds.includes(image.id));
         setImageList(updatedImageList);
     };
+    // const grid = 8;
+    const getListStyle = (isDraggingOver) => ({
+        background: isDraggingOver ? 'lightblue' : 'lightgrey',
+        display: 'flex',
+        overflow: 'auto',
+    });
+
+    const getItemStyle = () => ({
+        height: '20rem',
+        width: '20rem',
+    });
+
     return (
         <Container className="mt-4">
             <Imageupload onImageUpload={handleImageUpload} onImageRemove={handleImageRemove} />
@@ -88,16 +101,27 @@ export default function Landingpage() {
                 <Col md={9}>
                     <DragDropContext onDragEnd={handleDragEnd}>
                         <Droppable droppableId="image-gallery" direction="horizontal">
-                            {(provided) => (
-                                <Row ref={provided.innerRef} {...provided.droppableProps}>
+                            {(provided, snapshot) => (
+                                <div
+                                    ref={provided.innerRef}
+                                    {...provided.droppableProps}
+                                    className="d-flex"
+                                    style={getListStyle(snapshot.isDraggingOver)}
+                                >
                                     {imageList.map((item, index) => (
                                         <Draggable
                                             draggableId={`draggable-${item.id}`}
                                             key={`draggable-${item.id}`}
                                             index={index}
                                         >
-                                            {(provided) => (
-                                                <Col md={3} sm={3} xs={3}>
+                                            {(provided, snapshot) => (
+                                                <div
+                                                    className="mx-2"
+                                                    style={getItemStyle(
+                                                        snapshot.isDragging,
+                                                        provided.draggableProps.style
+                                                    )}
+                                                >
                                                     <input
                                                         type="checkbox"
                                                         checked={selectedImages.includes(item.id)}
@@ -113,11 +137,11 @@ export default function Landingpage() {
                                                         src={item.src}
                                                         alt={` ${index}`}
                                                     />
-                                                </Col>
+                                                </div>
                                             )}
                                         </Draggable>
                                     ))}
-                                </Row>
+                                </div>
                             )}
                         </Droppable>
                     </DragDropContext>
