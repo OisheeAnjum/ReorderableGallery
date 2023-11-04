@@ -23,6 +23,7 @@ export default function Landingpage() {
         }
         console.log(imageId);
     };
+
     const imageSources = [
         {
             id: 1,
@@ -50,7 +51,7 @@ export default function Landingpage() {
             const reader = new FileReader();
             reader.onload = () => {
                 const uploadedImage = {
-                    id: imageList.length + Math.floor(Math.random()) + index + 1, // Assign a unique ID
+                    id: imageList.length + Math.random() + index + 1, // Assign a unique ID
                     src: reader.result,
                 };
                 setImageList((prevImageList) => [...prevImageList, uploadedImage]);
@@ -77,14 +78,13 @@ export default function Landingpage() {
     // const grid = 8;
     const getListStyle = (isDraggingOver) => ({
         background: isDraggingOver ? 'lightblue' : 'lightgrey',
-        display: 'flex',
-        overflow: 'auto',
+        overflow: 'scroll',
     });
 
-    const getItemStyle = () => ({
-        height: '20rem',
-        width: '20rem',
-    });
+    // const getItemStyle = () => ({
+    //     height: '22rem',
+    //     width: '22rem',
+    // });
 
     return (
         <Container className="mt-4">
@@ -105,42 +105,53 @@ export default function Landingpage() {
                                 <div
                                     ref={provided.innerRef}
                                     {...provided.droppableProps}
-                                    className="d-flex"
                                     style={getListStyle(snapshot.isDraggingOver)}
                                 >
-                                    {imageList.map((item, index) => (
-                                        <Draggable
-                                            draggableId={`draggable-${item.id}`}
-                                            key={`draggable-${item.id}`}
-                                            index={index}
-                                        >
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    className="mx-2"
-                                                    style={getItemStyle(
-                                                        snapshot.isDragging,
-                                                        provided.draggableProps.style
-                                                    )}
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedImages.includes(item.id)}
-                                                        onChange={() => handleImageSelect(item.id)}
-                                                    />
-                                                    <img
-                                                        ref={provided.innerRef}
+                                    <Row>
+                                        {imageList.map((item, index) => (
+                                            <Draggable
+                                                draggableId={`draggable-${item.id}`}
+                                                key={`draggable-${item.id}`}
+                                                index={index}
+                                            >
+                                                {(provided) => (
+                                                    <Col
+                                                        md={3}
                                                         {...provided.draggableProps}
                                                         {...provided.dragHandleProps}
-                                                        className={`img-fluid  rounded rounded-1 m-1 ${
-                                                            index === 0 ? 'yellow-border' : 'border'
-                                                        }`}
-                                                        src={item.src}
-                                                        alt={` ${index}`}
-                                                    />
-                                                </div>
-                                            )}
-                                        </Draggable>
-                                    ))}
+                                                    >
+                                                        <div className="position-relative ">
+                                                            <img
+                                                                ref={provided.innerRef}
+                                                                className={`img-fluid  rounded rounded-1 m-1 ${
+                                                                    index === 0
+                                                                        ? 'yellow-border'
+                                                                        : 'border'
+                                                                }`}
+                                                                src={item.src}
+                                                                alt={` ${index}`}
+                                                            />
+                                                            <input
+                                                                className="position-absolute"
+                                                                type="checkbox"
+                                                                checked={selectedImages.includes(
+                                                                    item.id
+                                                                )}
+                                                                onChange={() =>
+                                                                    handleImageSelect(item.id)
+                                                                }
+                                                                style={{
+                                                                    zIndex: '10',
+                                                                    top: '8px',
+                                                                    right: '2px',
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                            </Draggable>
+                                        ))}
+                                    </Row>
                                 </div>
                             )}
                         </Droppable>
