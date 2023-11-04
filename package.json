@@ -30,6 +30,8 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-bootstrap": "^2.7.4",
     "react-dom": "^18.2.0",
+    "react-gesture-responder": "^2.1.0",
+    "react-grid-dnd": "^2.1.2",
     "react-icons": "^4.9.0",
     "react-pdf-js": "^5.1.0",
     "react-phone-input-2": "^2.15.1",
