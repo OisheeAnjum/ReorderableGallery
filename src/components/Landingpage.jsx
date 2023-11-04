@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Col, Container, Row } from 'react-bootstrap';
 import { GridContextProvider, GridDropZone, GridItem, swap } from 'react-grid-dnd';
-import { Button } from 'rsuite';
+import { toast } from 'react-toastify';
+import { Button, Modal } from 'rsuite';
 import image1 from '../assets/images/T1It0qMA.png';
 import image2 from '../assets/images/U6OVh27Q.png';
 import image4 from '../assets/images/iegS0M-g.png';
@@ -10,17 +11,6 @@ import image5 from '../assets/images/z90_d-Pg.png';
 import Imageupload from './Imageupload';
 
 export default function Landingpage() {
-    const [selectedImages, setSelectedImages] = useState([]);
-
-    const handleImageSelect = (imageId) => {
-        if (selectedImages.includes(imageId)) {
-            setSelectedImages(selectedImages.filter((id) => id !== imageId));
-        } else {
-            setSelectedImages([...selectedImages, imageId]);
-        }
-        console.log(imageId);
-    };
-
     const imageSources = [
         {
             id: 1,
@@ -46,13 +36,24 @@ export default function Landingpage() {
             id: 6,
             src: image5,
         },
-        // Add more images as needed
     ];
-
+    const [open, setOpen] = React.useState(false);
+    const handleOpen = () => setOpen(true);
+    const handleClose = () => setOpen(false);
     const [imageList, setImageList] = useState(imageSources);
+    const [selectedImages, setSelectedImages] = useState([]);
+
+    const handleImageSelect = (imageId) => {
+        if (selectedImages.includes(imageId)) {
+            setSelectedImages(selectedImages.filter((id) => id !== imageId));
+        } else {
+            setSelectedImages([...selectedImages, imageId]);
+        }
+        console.log(imageId);
+    };
+
     const handleImageUpload = (newImages) => {
         Array.from(newImages).forEach((image, index) => {
-            // You can use FileReader to read each uploaded image and generate a URL for it.
             const reader = new FileReader();
             reader.onload = () => {
                 const uploadedImage = {
@@ -64,21 +65,19 @@ export default function Landingpage() {
             reader.readAsDataURL(image);
         });
     };
-
-    // const handleDragEnd = (result) => {
-    //     if (!result.destination) {
-    //         return;
-    //     }
-
-    //     const reorderedImages = [...imageList];
-    //     const [movedImage] = reorderedImages.splice(result.source.index, 1);
-    //     reorderedImages.splice(result.destination.index, 0, movedImage);
-
-    //     setImageList(reorderedImages);
-    // };
     const handleImageRemove = (selectedImageIds) => {
-        const updatedImageList = imageList.filter((image) => !selectedImageIds.includes(image.id));
-        setImageList(updatedImageList);
+        console.log(selectedImageIds.length);
+        if (selectedImageIds.length === 0) {
+            <p>No Images Selected</p>;
+        } else {
+            const updatedImageList = imageList.filter(
+                (image) => !selectedImageIds.includes(image.id)
+            );
+            setImageList(updatedImageList);
+            toast.success('Images Deleted successfully');
+            handleClose();
+            setSelectedImages([]);
+        }
     };
 
     const onChange = (sourceId: string, sourceIndex: number, targetIndex: number) => {
@@ -87,8 +86,14 @@ export default function Landingpage() {
     };
     return (
         <Container className="mt-4">
-            <Imageupload onImageUpload={handleImageUpload} onImageRemove={handleImageRemove} />
-            <Button onClick={() => handleImageRemove(selectedImages)}>Delete</Button>
+            <div className="d-flex justify-content-end">
+                {' '}
+                <Imageupload onImageUpload={handleImageUpload} onImageRemove={handleImageRemove} />
+                <Button className="custom-button" appearance="primary" onClick={handleOpen}>
+                    Delete
+                </Button>
+            </div>
+
             <Row>
                 <Col md={3}>
                     <img
@@ -103,7 +108,7 @@ export default function Landingpage() {
                             id="items"
                             boxesPerRow={4}
                             rowHeight={150}
-                            style={{ height: '430px' }}
+                            style={{ height: '450px' }}
                         >
                             {imageList.map((item, index) => (
                                 <GridItem key={item.id}>
@@ -117,7 +122,8 @@ export default function Landingpage() {
                                             className="img-fluid"
                                             src={item.src}
                                             alt={` ${index}`}
-                                            style={{ maxHeight: '8rem' }}
+                                            style={{ maxHeight: '7.9rem' }}
+                                            draggable="false"
                                         />
                                         <input
                                             className="position-absolute"
@@ -137,6 +143,37 @@ export default function Landingpage() {
                     </GridContextProvider>
                 </Col>
             </Row>
+            <Modal keyboard={false} open={open} onClose={handleClose}>
+                <Modal.Header>
+                    <Modal.Title>Delete Selected Images</Modal.Title>
+                </Modal.Header>
+
+                <Modal.Body>
+                    {selectedImages.length > 0 ? (
+                        <p>
+                            Are You Sure You Want To Delete &nbsp;
+                            {selectedImages.length}{' '}
+                            {selectedImages.length === 1 ? 'selected image' : 'selected images'} ?
+                        </p>
+                    ) : (
+                        <p>No Image Selected</p>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    {selectedImages.length > 0 && (
+                        <Button
+                            className="custom-button"
+                            onClick={() => handleImageRemove(selectedImages)}
+                            appearance="primary"
+                        >
+                            Delete
+                        </Button>
+                    )}
+                    <Button onClick={handleClose} appearance="subtle">
+                        Cancel
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 }

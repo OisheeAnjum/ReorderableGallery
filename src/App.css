@@ -39,3 +39,53 @@
     transform: rotate(360deg);
   }
 }
+.custom-file-input-label {
+  display: inline-block;
+  position: relative;
+}
+
+.custom-button {
+  background-color: rgb(191, 0, 255);
+  color: #fff;
+  padding: 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  height: 2rem;
+  margin-left: 10px;
+  font-size: medium;
+  font-weight: 300;
+}
+.custom-button:hover {
+  background-color: rgb(191, 0, 255);
+  color: #fff;
+  padding: 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  height: 2rem;
+  margin-left: 10px;
+  font-size: medium;
+  font-weight: 300;
+}
+.custom-button:focus {
+  background-color: rgb(191, 0, 255);
+  color: #fff;
+  padding: 5px;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  height: 2rem;
+  margin-left: 10px;
+  font-size: medium;
+  font-weight: 300;
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+}
