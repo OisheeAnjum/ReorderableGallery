@@ -26,7 +26,7 @@ function ImageUpload({ onImageUpload }) {
 
     return (
         <div className="d-flex justify-content-between">
-            <label className="custom-file-input-label">
+            <label className="custom-file-input-label m-0">
                 <div className="custom-button">Add New</div>
                 <input
                     id="file-input"
