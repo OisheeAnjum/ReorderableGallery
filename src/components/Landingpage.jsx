@@ -44,7 +44,7 @@ export default function Landingpage() {
     const handleClose = () => setOpen(false);
     const [imageList, setImageList] = useState(imageSources);
     const [selectedImages, setSelectedImages] = useState([]);
-
+    // select image to delete
     const handleImageSelect = (imageId) => {
         if (selectedImages.includes(imageId)) {
             setSelectedImages(selectedImages.filter((id) => id !== imageId));
@@ -60,6 +60,7 @@ export default function Landingpage() {
             ? baseHeight + Math.floor((imageList.length - 1) / 4) * 70
             : baseHeight + Math.floor((imageList.length - 1) / 4) * 160
     }px`;
+    // upload new image
     const handleImageUpload = (newImages) => {
         Array.from(newImages).forEach((image, index) => {
             const reader = new FileReader();
@@ -73,6 +74,7 @@ export default function Landingpage() {
             reader.readAsDataURL(image);
         });
     };
+    // remove image
     const handleImageRemove = (selectedImageIds) => {
         if (selectedImageIds.length === 0) {
             <p>No Images Selected</p>;
@@ -86,7 +88,7 @@ export default function Landingpage() {
             setSelectedImages([]);
         }
     };
-
+    // on drag end
     const onChange = (sourceId: string, sourceIndex: number, targetIndex: number) => {
         const nextState = swap(imageList, sourceIndex, targetIndex);
         setImageList(nextState);
